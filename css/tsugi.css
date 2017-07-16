@@ -10,7 +10,7 @@
         background: #000;
         margin: 5px;
     }
-    
+
     .youtube-player iframe {
         position: absolute;
         top: 0;
@@ -20,7 +20,7 @@
         z-index: 100;
         background: transparent;
     }
-    
+
     .youtube-player img {
         bottom: 0;
         display: block;
@@ -38,11 +38,11 @@
         -moz-transition: .4s all;
         transition: .4s all;
     }
-    
+
     .youtube-player img:hover {
         -webkit-filter: brightness(75%);
     }
-    
+
     .youtube-player .play {
         height: 72px;
         width: 72px;
@@ -83,4 +83,6 @@
     text-align: center;
 }
  
-</style>
+.lti_frameResize {
+  border: 1px solid #aaa;
+}

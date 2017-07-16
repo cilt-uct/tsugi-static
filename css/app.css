@@ -1,0 +1,194 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+#application {
+  font-family: 'Roboto',sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #222;
+}
+
+#application button {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#application .nav-tabs h1 {
+  font-size: 32px;
+  margin: 4px 0px 0px 0px;
+  padding-right: 10px;
+}
+
+#application .nav-tabs > li > a {
+  color: #888;
+  font-size: 18px;
+}
+
+#application .nav-tabs > li.active > a {
+    color: #222;
+}
+
+#application table {
+  color: #333;
+}
+
+#application table.calendar-table {
+  border-right: 1px solid #EAEAEA;
+  width: 100%;
+}
+
+#application table thead th {
+  background-color: #F8F8F8;
+  font-weight: normal;
+  font-size: 14px;
+  padding: 0.5em;
+}
+
+#application table.calendar-table thead th {
+  /*width: 125px;*/
+}
+
+#application table td {
+  vertical-align: top;
+}
+
+#application table.calendar-table td {
+  border-bottom: 1px solid #EAEAEA;
+  /*height: 118px;*/
+}
+
+#application table.calendar-table td div.day {
+  color: #767676;
+  font-size: 18px;
+  font-weight: 200;
+  margin-left: 0.8em;
+}
+
+#application table.calendar-table td.prev div,
+#application table.calendar-table td.next div  {
+  opacity: 0.5;
+}
+
+#application table.calendar-table td > div:last-child {
+  margin-left: 0.8em;
+}
+
+#application table.calendar-table td div > div {
+  border: 1px solid #ccc;
+  background-color: #eee;
+  width: 22px;
+  height: 22px;
+  margin-right: 0.8em;
+  margin-bottom: 0.8em;
+  float: left;
+  cursor: pointer;
+}
+
+#application table.calendar-table td div > div:hover {
+  border-color: #aaa;
+}
+
+#application table.calendar-table td div > div.me {
+  border: 1px solid #449d44;
+  background-color: #449d44;
+}
+
+#application table.calendar-table td div > div.me:hover {
+  border-color: #2D682D;
+}
+
+#application table.calendar-table td div > div.used {
+  border: 1px solid #5bc0de;
+  background-color: #46b8da;
+}
+
+#application table.calendar-table td div > div.used:hover {
+  border-color: #20839F;
+}
+
+#application table div.record {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+#application table div.record:hover {
+  background-color: rgba(66, 139, 202, 0.1);
+}
+
+#application table div.title {
+  width: 235px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-bottom: 6px;
+  font-weight: 600;
+  padding-left: 6px;
+}
+
+#application #myModalLabel {
+  width: 530px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#application table div.time {
+  margin-bottom: 8px;
+}
+
+.nopadding > div[class^="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+#application h4 {
+  font-family: 'Roboto',sans-serif;
+  font-weight: 300;
+  font-size: 2em;
+}
+
+#application h4 span {
+  color: #666;
+}
+
+#application h4 span:first-child {
+  padding-right: 20px;
+}
+
+#application h4 span:last-child {
+  padding-left: 20px;
+}
+
+#application .legend {
+  margin-top: 395px;
+  padding-left: 20px;
+}
+
+#application .legend div.text {
+  padding-top: 2px;
+  color: #999;
+  font-size: 12px;
+}
+#application .legend div.box,
+#application .legend div.me,
+#application .legend div.used  {
+  border: 1px solid #ccc;
+  background-color: #eee;
+  width: 20px;
+  height: 20px;
+  margin-right: 0.3em;
+  margin-bottom: 0.3em;
+  float: left;
+  cursor: pointer;
+}
+
+#application .legend div.me {
+  border: 1px solid #449d44;
+  background-color: #449d44;
+}
+
+#application .legend div.used {
+  border: 1px solid #5bc0de;
+  background-color: #46b8da;
+}
