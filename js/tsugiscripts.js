@@ -306,6 +306,49 @@ function tsugiSetCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
+// Figure out the maximum z-index
+// http://stackoverflow.com/questions/1118198/how-can-you-figure-out-the-highest-z-index-in-your-document
+function maxZIndex(elems)
+{
+    var maxIndex = 0;
+    elems = typeof elems !== 'undefined' ? elems : $("*");
+
+    $(elems).each(function(){
+        maxIndex = (parseInt(maxIndex) < parseInt($(this).css('z-index'))) ? parseInt($(this).css('z-index')) : maxIndex;
+    });
+
+    return maxIndex;
+}
+
+// Show an overlay div
+function showOverlay(elem, spinner) {
+        elem = elem || "#tsugi_overlay";
+        spinner = spinner || "#tsugi_overlay_spinner";
+        elem="#tsugi_overlay", spinner="#tsugi_overlay_spinner"
+        // In order to float above the BootStrap navigation
+        var maxz = maxZIndex();
+        $(elem).css('z-index',maxz+1);
+        $(spinner).css('z-index',maxz+1);
+        var top = ($(window).height() / 4) - ( $(spinner).height() / 2);
+        if ( top < 10 ) top = 10;
+        top = top +'px'
+        $(spinner).css('margin-top',top);
+        $(elem).show();
+        $(spinner).show();
+}
+
+// Hide an overlay div
+function hideOverlay(elem, spinner) {
+        elem = elem || "#tsugi_overlay";
+        spinner = spinner || "#tsugi_overlay_spinner";
+
+        var maxz = maxZIndex();
+        $(elem).css('z-index',-1);
+        $(spinner).css('z-index',-1);
+        $(elem).hide();
+        $(spinner).hide();
+}
+
 $TSUGI_EMBED_TIMEOUT = false;
 // Setup the menu
 function tsugiEmbedMenu() {

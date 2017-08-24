@@ -71,7 +71,18 @@
   font-weight:bold;
 }
 
-
+.tsugi_overlay {
+    opacity:1.0;
+    background-color:#fff;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:1000;
+    text-align: center;
+}
+ 
 .lti_frameResize {
   border: 1px solid #aaa;
 }
