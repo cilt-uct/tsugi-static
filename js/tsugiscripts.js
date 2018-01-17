@@ -282,9 +282,35 @@ var TSUGI_TEMPLATES = {};
 function tsugiHandlebarsRender(name, context) {
 
     if ( ! (name in TSUGI_TEMPLATES ) ) {
-        window.console && console.log("Compiling "+name);
-        var source  = $("#template-"+name).html();
-        var compile = Handlebars.compile(source);
+        var source = false;
+        var compile = false;
+
+        // Check if the import flattened the imported content 
+        // Here's looking at you FireFox and Safari
+        var template = document.querySelector('#'+name);
+        if ( template ) {
+            source = template.content.firstElementChild.innerHTML;
+            if ( source ) {
+                compile = Handlebars.compile(source);
+                window.console && console.log('Compiling '+name+' from base document');
+            }
+        }
+
+        // Check if this came in as a web component
+        if ( ! compile && window.HandleBarsTemplateFromImport ) {
+            source = window.HandleBarsTemplateFromImport('#'+name);
+            if ( source ) {
+                compile = Handlebars.compile(source);
+                window.console && console.log('Compiling '+name+' from HandleBarsTemplateFromImport');
+            }
+        }
+
+        // The pre-web component way
+        if ( !compile ) {
+            source  = $("#template-"+name).html();
+            compile = Handlebars.compile(source);
+            window.console && console.log('Compiling '+name+' from tag');
+        }
         TSUGI_TEMPLATES[name] = compile;
     }
     window.console && console.log("Rendering "+name);
@@ -372,8 +398,13 @@ if ( 'registerElement' in document
       && 'content' in document.createElement('template')) {
     // platform is good!
     // console.log("Web Components there ... "+_TSUGI.staticroot);
+    // Do this later than $(document).ready()
+    $(window).on("load", function(){
+        var event = new Event('WebComponentsReady');
+        window.dispatchEvent(event);
+    });
 } else {
-    var polyfill = _TSUGI.staticroot+'/polyfill/webcomponentsjs-1.0.5/webcomponents-lite.js'
+    var polyfill = _TSUGI.staticroot+'/polyfill/webcomponentsjs-1.0.22/webcomponents-lite.js'
     var e = document.createElement('script');
     e.src = polyfill;
     document.body.appendChild(e);
@@ -402,3 +433,16 @@ function window_close()
     setTimeout(function(){ console.log("Attempting self.close"); self.close(); }, 1000);
     setTimeout(function(){ console.log("Notifying the user."); alert(_TSUGI.window_close_message); open("about:blank", '_self').close(); }, 2000);
 }
+
+function addSession(url) {
+    if ( ! _TSUGI.ajax_session ) return url;
+    var retval = url;
+    if ( retval.indexOf('?') > 0 ) {
+        retval += '&';
+    } else {
+        retval += '?';
+    }
+    retval += _TSUGI.ajax_session;
+    return retval;
+}
+
