@@ -1,48 +1,38 @@
 // The scripts for the TSUGI runtime
 // Needs to be loaded at the end after JQuery is loaded
 
-// Send the CRF token on all of the non-ajax() calls
-$.ajaxSetup({
-    cache: false,
-    headers : {
-        'X-CSRF-Token' : CSRF_TOKEN
-    }
-});
+// Send the CSRF token on all of the non-ajax() calls
+if ( typeof(CSRF_TOKEN) !== 'undefined' ) {
+    $.ajaxSetup({
+        cache: false,
+        headers : {
+            'X-CSRF-Token' : CSRF_TOKEN
+        }
+    });
+} else {
+    $.ajaxSetup({ cache: false });
+}
 
 function doHeartBeat() {
-    // Legacy
-    if ( window.HEARTBEAT_URL ) {
-        window.console && console.log('Calling legacy heartbeat to extend session');
-        $.getJSON(HEARTBEAT_URL, function(data) {
-            window.console && console.log(data);
-            if ( data.lti || data.cookie ) {
-                // No problem
-            } else {
-                clearInterval(HEARTBEAT_INTERVAL);
-                HEARTBEAT_INTERVAL = false;
-                alert(_TSUGI.session_expire_message);
-                window.location.href = "about:blank";
-            }
-        }).fail(function() {
-            console.log( "clearing interval" );
-            clearInterval(HEARTBEAT_INTERVAL);
-            HEARTBEAT_INTERVAL = false;
-        });
-    // New way - Only start timer upon success, add a minimum
-    } else {
-        window.console && console.log('Calling heartbeat to extend session');
-        $.getJSON(_TSUGI.heartbeat_url, function(data) {
-            window.console && console.log(data);
-            if ( data.lti || data.cookie ) {
-                var howlong = _TSUGI.heartbeat;
-                if ( howlong < 5*60*1000 ) {
-                    console.log('Timer was too short',howlong);
-                    howlong = 5*60*1000;
-                }
-                HEARTBEAT_TIMEOUT = setTimeout(doHeartBeat, howlong);
-            }
-        });
+    var d = new Date();
+    window.console && console.log('Heartbeat '+d);
+    if ( typeof(_TSUGI.heartbeat_url) == 'undefined' ) {
+        console.log('Heartbeat url not defined');
+        return;
     }
+    $.getJSON(_TSUGI.heartbeat_url, function(data) {
+        window.console && console.log(data);
+        if ( data.lti || data.cookie ) {
+            var howlong = _TSUGI.heartbeat;
+            if ( howlong < 5*60*1000 ) {
+               console.log('Timer was too short',howlong);
+               howlong = 5*60*1000;
+            }
+            HEARTBEAT_TIMEOUT = setTimeout(doHeartBeat, howlong);
+        } else {
+            console.log('Heartbeat turned off - no longer logged in');
+        }
+    });
 }
 
 var DE_BOUNCE_LTI_FRAME_RESIZE_TIMER = false;
@@ -292,8 +282,8 @@ function labnolThumb(id) {
     return thumb.replace("ID", id) + play;
 }
 
-function labnolIframe() {
-    // Reset any currently active players...
+// Reset any currently active players...
+function labnolStopPlayers() {
     var v = document.getElementsByClassName("generated-youtube-frame");
     for (n = 0; n < v.length; n++) {
         div = document.createElement("div");
@@ -302,6 +292,10 @@ function labnolIframe() {
         div.onclick = labnolIframe;
         v[n].parentNode.replaceChild(div, v[n]);
     }
+}
+
+function labnolIframe() {
+    labnolStopPlayers();
 
     var iframe = document.createElement("iframe");
     var embed = "https://www.youtube.com/embed/ID?autoplay=1";
@@ -498,7 +492,7 @@ function window_close()
 }
 
 function addSession(url) {
-    if ( ! _TSUGI.ajax_session ) return url;
+    if ( typeof(_TSUGI.ajax_session) == 'undefined' ) return url;
     var retval = url;
     if ( retval.indexOf('?') > 0 ) {
         retval += '&';
@@ -521,6 +515,7 @@ function htmlentities(raw) {
 
 // Get a websocket
 function tsugiNotifySocket(room) {
+    if ( typeof(_TSUGI.websocket_url) == 'undefined' ) return;
     if ( window.WebSocket && _TSUGI.websocket_url && _TSUGI.websocket_token ) {
         var url = _TSUGI.websocket_url+'/notify?token=';
         url = url + encodeURIComponent(_TSUGI.websocket_token);
@@ -635,16 +630,23 @@ function tsugiSha256(ascii) {
     return result;
 }
 
+// Adapted from
 // https://dev.to/mornir/-how-to-easily-copy-text-to-clipboard-a1a
-function copyToClipboard(par, textToCopy) {
+// Added avoiding the scrolling effect by appending the new input
+// tag as a child of a nearby element (the parent element)
+// Usage:
+// <a href="#" onclick="copyToClipboardNoScroll(this, 'texttocopy');return false;">Copy</a>
+// <a href="#" onclick="copyToClipboardNoScroll(this, $('#pass').text());return false;">Copy</a>
+// <a href="#" onclick="copyToClipboardNoScroll(this, $('#myInput').val());return false;">Copy</a>
+function copyToClipboardNoScroll(parent_element, textToCopy) {
   // 1) Add the text to the DOM (usually achieved with a hidden input field)
   const input = document.createElement('input');
 
   // 1.5) Move off to the left but inline with the current item to avoid scroll effects
   input.style.position = 'absolute';
   input.style.left = '-1000px';
-  par.appendChild(input);
-  input.value = textToCopy;
+  parent_element.appendChild(input);
+  input.value = textToCopy.trim();
 
   // 2) Select the text
   input.focus();
@@ -660,6 +662,12 @@ function copyToClipboard(par, textToCopy) {
 
   // Remove the new input tag
   input.remove();
+}
+
+// TODO: Remove Legacy one of these days
+// https://dev.to/mornir/-how-to-easily-copy-text-to-clipboard-a1a
+function copyToClipboard(par, textToCopy) {
+  copyToClipboardNoScroll(par, textToCopy);
 }
 
 // Make sure format is present
@@ -708,4 +716,12 @@ function tsugiCheckFileMaxSize () {
             return isOk;
         });
     });
+}
+
+if ( typeof(_TSUGI) == 'undefined' ) {
+     var _TSUGI = {
+            staticroot: "https://static.tsugi.org/",
+            window_close_message: "Application complete",
+            session_expire_message: "Your session has expired"
+     }
 }
