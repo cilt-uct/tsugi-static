@@ -1,0 +1,39 @@
+/**
+ * Accessibility patches for Bootstrap 3.4.1
+ * Included right after bootstrap.min.css to override WCAG contrast failures.
+ */
+
+/* Override Bootstrap .text-muted for WCAG contrast. Bootstrap's default fails WAVE checks. #555 on white ≈ 7.4:1 (AA compliant). */
+.text-muted {
+  color: #555 !important;
+}
+
+/* Override .btn-danger for WCAG contrast (Bootstrap f-up). #c9302c on #fff ≈ 5.33:1 */
+.btn-danger {
+  color: #fff;
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
+/* Pagination: Bootstrap uses #777 for links/disabled (4.47:1), fails WCAG AA. #595959 on white ≈ 6.6:1 */
+/* Bootstrap 4/5: .page-link */
+.pagination .page-link {
+  color: #595959;
+}
+/* Bootstrap 3: disabled state only (default links use #337ab7 which is fine) */
+.pagination > .disabled > a,
+.pagination > .disabled > span {
+  color: #595959;
+}
+
+/* Bootstrap .label: ~75% font-size triggers WAVE "very small text". 12px minimum for all labels. */
+.label {
+  font-size: 12px !important;
+}
+
+/* .label-info: #5bc0de fails WAVE contrast with white text. #2c7bb6 on #fff ≈ 4.5:1 (AA). */
+.label-info {
+  background-color: #2c7bb6 !important;
+  color: #fff !important;
+  border-color: #2874a6;
+}

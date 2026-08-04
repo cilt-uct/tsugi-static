@@ -3,7 +3,7 @@ Customizations specifically related to theming
 This is imported at the top of tsugi2.css
 */
 body a {
-    color: var(--text-light);
+    color: var(--primary, #337ab7);
 }
 .navbar a, .panel-heading a, a.btn {
     text-decoration: none;
@@ -17,11 +17,11 @@ body a {
 }
 a.btn-link, button.btn-link {
     text-decoration: underline;
-    color: var(--text);
+    color: var(--primary, #337ab7);
 }
 a.btn-link:hover, button.btn-link:hover, button.btn-link:focus {
     text-decoration: underline;
-    color: var(--text);
+    color: var(--primary-darker, #23527c);
 }
 .btn-outline-background {
     background-color: var(--background-color);
@@ -34,7 +34,25 @@ a.btn-link:hover, button.btn-link:hover, button.btn-link:focus {
     border: 1px solid var(--text);
 }
 body a:hover, body a:focus {
-    color: var(--text);
+    color: var(--primary-darker, #23527c);
+}
+/* Lesson index (Lessons.php / Lessons2.php renderAll): whole card is one link — match body text, not global link blue */
+#box .card > div > a,
+#box .card > div > a:visited,
+a.tsugi-lessons-module-card-link,
+a.tsugi-lessons-module-card-link:visited {
+    color: var(--text, #333);
+    text-decoration: none;
+}
+#box .card > div > a:hover,
+a.tsugi-lessons-module-card-link:hover {
+    color: var(--text, #333);
+    text-decoration: none;
+}
+#box .card > div > a:focus,
+a.tsugi-lessons-module-card-link:focus {
+    color: var(--text, #333);
+    text-decoration: underline;
 }
 .panel-heading a:hover {
     color: var(--secondary-menu);

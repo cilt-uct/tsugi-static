@@ -13,6 +13,61 @@ if ( typeof(CSRF_TOKEN) !== 'undefined' ) {
     $.ajaxSetup({ cache: false });
 }
 
+// Store _TSUGI in browser session storage - very defensive
+(function() {
+    var STORAGE_KEY = 'TSUGI_SESSION_DATA';
+    try {
+        if (typeof window === 'undefined') return;
+        if (!window.sessionStorage) return;
+        try { window.sessionStorage.setItem('_test', '_test'); window.sessionStorage.removeItem('_test'); } catch (q) { return; }
+        if (typeof _TSUGI === 'undefined' || _TSUGI === null) return;
+        if (typeof _TSUGI !== 'object' || Array.isArray(_TSUGI)) return;
+        var json;
+        try { json = JSON.stringify(_TSUGI); } catch (e) { return; }
+        if (typeof json !== 'string' || json.length === 0) return;
+        window.sessionStorage.setItem(STORAGE_KEY, json);
+    } catch (e) {
+        if (window.console && typeof window.console.warn === 'function') {
+            window.console.warn('TSUGI: Failed to store session data:', e);
+        }
+    }
+})();
+
+/**
+ * Retrieve _TSUGI object from browser session storage if it exists.
+ * Returns the object or null if unavailable, invalid, or on any error.
+ * @returns {Object|null} The stored _TSUGI object or null
+ */
+function TSUGI_browser_session() {
+    var STORAGE_KEY = 'TSUGI_SESSION_DATA';
+    try {
+        if (typeof window === 'undefined') return null;
+        if (!window.sessionStorage) return null;
+        var stored = window.sessionStorage.getItem(STORAGE_KEY);
+        if (stored == null || typeof stored !== 'string') return null;
+        if (stored.length === 0) return null;
+        var parsed;
+        try { parsed = JSON.parse(stored); } catch (e) { return null; }
+        if (parsed == null || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+        return parsed;
+    } catch (e) {
+        if (window.console && typeof window.console.warn === 'function') {
+            window.console.warn('TSUGI: Failed to retrieve session data:', e);
+        }
+        return null;
+    }
+}
+
+// Make sure _TSUGI is defined - do the store above this - only store valid data
+
+if ( typeof(_TSUGI) == 'undefined' ) {
+     var _TSUGI = {
+            staticroot: "https://static.tsugi.org/",
+            window_close_message: "Application complete",
+            session_expire_message: "Your session has expired"
+     }
+}
+
 function doHeartBeat() {
     var d = new Date();
     window.console && console.log('Heartbeat '+d);
@@ -303,7 +358,40 @@ function labnolStopPlayers() {
     }
 }
 
-function labnolIframe() {
+// Theatre mode open in new window - works 2026-02-18 with stricter YouTube rules
+// Theatre mode open in new window - playlist aware
+function labnolIframe(e) {
+    e.preventDefault();
+  
+    const id = this.dataset.id;
+  
+    let url =
+      "https://www.youtube.com/watch?v=" +
+      encodeURIComponent(id);
+  
+    // Add playlist context ONLY if defined and non-empty
+    if (typeof _TSUGI.youtube_playlist !== "undefined" && _TSUGI.youtube_playlist && _TSUGI.youtube_playlist.length > 0) {
+      url += "&list=" + encodeURIComponent(_TSUGI.youtube_playlist);
+    }
+  
+    // Additional playback flags
+    url +=
+      "&rel=0" +            // fewer suggested videos
+      "&modestbranding=1" + // cleaner chrome
+      "&autoplay=0";        // explicit, predictable behavior
+  
+    console.log("Opening YouTube URL: "+url);
+    window.open(url, "_blank", "noopener,noreferrer");
+  
+    const overlay = this.closest(".w3schools-overlay");
+    if (overlay) overlay.style.display = "none";
+  
+    return false;
+  }
+  
+
+// Original with cookie - Fails in 2026 with autobot detection on YouTube
+function labnolIframeOrig() {
     labnolStopPlayers();
 
     var iframe = document.createElement("iframe");
@@ -317,6 +405,36 @@ function labnolIframe() {
     iframe.setAttribute("mozallowfullscreen", "1");
     this.parentNode.replaceChild(iframe, this);
 }
+
+// No Cookie - Fails in 2026 with autobot detection on YouTube
+function labnolIframeNoCookie() {
+  labnolStopPlayers();
+
+  var iframe = document.createElement("iframe");
+  var embed =
+    "https://www.youtube-nocookie.com/embed/ID" +
+    "?autoplay=1" +
+    "&rel=0" +
+    "&modestbranding=1" +
+    "&playsinline=1";
+
+  iframe.setAttribute("src", embed.replace("ID", this.dataset.id));
+  iframe.setAttribute("frameborder", "0");
+  iframe.setAttribute("class", "generated-youtube-frame");
+  iframe.setAttribute("data-id", this.dataset.id);
+
+  // modern
+  iframe.setAttribute("allowfullscreen", "");
+  iframe.setAttribute("allow", "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture");
+
+  // legacy (optional; harmless)
+  // iframe.setAttribute("webkitAllowFullScreen", "1");
+  // iframe.setAttribute("mozallowfullscreen", "1");
+
+  this.parentNode.replaceChild(iframe, this);
+}
+
+
 
 var TSUGI_TEMPLATES = {};
 
@@ -726,12 +844,4 @@ function tsugiCheckFileMaxSize () {
             return isOk;
         });
     });
-}
-
-if ( typeof(_TSUGI) == 'undefined' ) {
-     var _TSUGI = {
-            staticroot: "https://static.tsugi.org/",
-            window_close_message: "Application complete",
-            session_expire_message: "Your session has expired"
-     }
 }
